@@ -14,6 +14,6 @@ FROM library/alpine:3.17
 WORKDIR /app
 ENV PATH=$PATH:/app
 
-COPY --from=build /build/netwaiter .
+COPY --from=build /build/netwait .
 
-ENTRYPOINT ["/app/netwaiter"]
+ENTRYPOINT ["/app/netwait"]

@@ -17,7 +17,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v4.1.1
       with:
-        images: merusso/netwaiter
+        images: merusso/netwait
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -44,12 +44,12 @@ jobs:
       uses: thatisuday/go-cross-build@v1.1.0
       with:
         platforms: linux/amd64,darwin/amd64,windows/amd64
-        name: netwaiter
+        name: netwait
         # Flags to pass to the Go linker.
-        ldflags: "-X 'github.com/merusso/netwaiter/cmd.version=${{ steps.meta.outputs.version }}'"
+        ldflags: "-X 'github.com/merusso/netwait/cmd.version=${{ steps.meta.outputs.version }}'"
 
 #    - name: Upload Artifact
 #      uses: actions/upload-artifact@v3
 #      with:
-#        name: netwaiter
+#        name: netwait
 #        path: build/

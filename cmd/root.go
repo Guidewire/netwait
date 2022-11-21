@@ -9,17 +9,17 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "netwaiter",
+	Use:   "netwait",
 	Short: "wait for a network resource to become available",
 	Long: `
 Repeatedly attempt to connect to a network resource and wait until a successful
 connection has been established or a timeout has elapsed.
 
 Examples:
-wait https://github.com
-wait github.com
-wait --timeout 10s https://github.com
-wait https://github.com https://github.com/merusso/netwaiter`,
+netwait https://github.com
+netwait github.com
+netwait --timeout 10s https://github.com
+netwait https://github.com https://github.com/merusso/netwait`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: runWait,
 }
