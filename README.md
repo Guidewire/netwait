@@ -27,7 +27,10 @@ Netwait returns a non-zero exit code if it was unable to successfully connect
 to the network resource within a certain time period.
 
 ```bash
-$ if ./netwait bad-domain.fake:443; then echo 'SUCCESS'; else echo 'FAIL'; fi
+$ netwait http://httpbin.org/status/200 && echo 'SUCCESS'
+SUCCESS
+
+$ if netwait bad-domain.fake:443; then echo 'SUCCESS'; else echo 'FAIL'; fi
 Error: All attempts fail:
 #1: dial tcp: lookup bad-domain.fake: no such host
 #2: context deadline exceeded
