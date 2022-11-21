@@ -20,14 +20,14 @@ Docker image: [merusso/netwaiter](https://hub.docker.com/r/merusso/netwaiter)
 
 ```bash
 # Wait for resource to become available
-$ netwaiter wait https://github.com
+$ netwaiter https://github.com
 ```
 
 Netwaiter returns a non-zero exit code if it was unable to successfully connect
 to the network resource within a certain time period.
 
 ```bash
-$ if ./netwaiter wait bad-domain.fake:443; then echo 'SUCCESS'; else echo 'FAIL'; fi
+$ if ./netwaiter bad-domain.fake:443; then echo 'SUCCESS'; else echo 'FAIL'; fi
 Error: All attempts fail:
 #1: dial tcp: lookup bad-domain.fake: no such host
 #2: context deadline exceeded
@@ -40,9 +40,9 @@ Netwaiter can wait for an HTTP URL. Success is defined as an HTTP response with
 a 2xx status code. HTTP Redirects are followed.
 
 ```bash
-$ netwaiter wait http://httpbin.org/status/200
+$ netwaiter http://httpbin.org/status/200
 
-$ netwaiter wait -t 10s http://httpbin.org/status/500
+$ netwaiter -t 10s http://httpbin.org/status/500
 Error: All attempts fail:
 #1: GET 'http://httpbin.org/status/500': returned status code 500
 #2: GET 'http://httpbin.org/status/500': returned status code 500
@@ -53,7 +53,7 @@ Error: All attempts fail:
 ## TCP resource
 
 ```bash
-$ netwaiter wait github.com:443
+$ netwaiter github.com:443
 ```
 
 ## Multiple resources
@@ -62,17 +62,17 @@ Netwaiter will attempt to connect to multiple resources in parallel. All
 resources must successfully connect for the command to return success.
 
 ```bash
-$ netwaiter wait https://github.com https://go.dev/
+$ netwaiter https://github.com https://go.dev/
 ```
 
 ## Timeout
 
 ```bash
 # stop waiting after up to 10 seconds
-$ netwaiter wait --timeout 10s github.com:443
+$ netwaiter --timeout 10s github.com:443
 
 # stop waiting after up to 2 minutes
-$ netwaiter wait --timeout 2m github.com:443
+$ netwaiter --timeout 2m github.com:443
 ```
 
 ## Docker
@@ -82,5 +82,5 @@ Netwaiter is available as a Docker image. The image is configured with an
 arguments passed to `netwaiter`
 
 ```bash
-$ docker run --rm merusso/netwaiter wait https://github.com
+$ docker run --rm merusso/netwaiter https://github.com
 ```
