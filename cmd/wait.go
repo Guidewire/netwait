@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"github.com/merusso/netwaiter/wait"
-	"time"
-
 	"github.com/spf13/cobra"
 )
 
@@ -21,22 +19,21 @@ wait github.com
 wait --timeout 10s https://github.com
 wait https://github.com https://github.com/merusso/netwaiter
 `,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		timeout, err := cmd.Flags().GetDuration("timeout")
-		if err != nil {
-			panic(err)
-		}
-		cmd.SilenceUsage = true
-
-		waiter := wait.CompositeMultiWaiter{}
-		return waiter.WaitMulti(args, timeout)
-	},
+	RunE: runWait,
 	Args: cobra.MinimumNArgs(1),
 }
 
 func init() {
 	rootCmd.AddCommand(waitCmd)
+}
 
-	waitCmd.Flags().DurationP("timeout", "t", 1*time.Minute,
-		"timeout to abort connection attempts")
+func runWait(cmd *cobra.Command, args []string) error {
+	timeout, err := cmd.Flags().GetDuration("timeout")
+	if err != nil {
+		panic(err)
+	}
+	cmd.SilenceUsage = true
+
+	waiter := wait.CompositeMultiWaiter{}
+	return waiter.WaitMulti(args, timeout)
 }

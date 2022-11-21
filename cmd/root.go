@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -12,7 +13,15 @@ var rootCmd = &cobra.Command{
 	Short: "wait for a network resource to become available",
 	Long: `
 Repeatedly attempt to connect to a network resource and wait until a successful
-connection has been established or a timeout has elapsed.`,
+connection has been established or a timeout has elapsed.
+
+Examples:
+wait https://github.com
+wait github.com
+wait --timeout 10s https://github.com
+wait https://github.com https://github.com/merusso/netwaiter`,
+	Args: cobra.MinimumNArgs(1),
+	RunE: runWait,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -25,13 +34,6 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.netwaiter.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().DurationP("timeout", "t", 1*time.Minute,
+		"timeout to abort connection attempts")
 }
