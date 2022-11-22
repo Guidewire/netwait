@@ -53,7 +53,11 @@ func getWaiterForResource(resource string) (NetWaiter, error) {
 	// See: https://stackoverflow.com/questions/31480710/validate-url-with-standard-package-in-go
 	u, err := url.ParseRequestURI(resource)
 	if err == nil && u.Scheme != "" && u.Host != "" {
-		return HttpWaiter{}, nil
+		if u.Scheme == "http" || u.Scheme == "https" {
+			return HttpWaiter{}, nil
+		} else {
+			return nil, fmt.Errorf("invalid format: URL scheme must be http(s): %s", resource)
+		}
 	}
 
 	// non-URL resource must not contain /

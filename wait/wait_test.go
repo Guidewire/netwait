@@ -23,7 +23,7 @@ func Test_getWaiterForResource(t *testing.T) {
 		},
 		{
 			name: "HTTP resource, short URL",
-			args: args{resource: "https://service.fake"},
+			args: args{resource: "http://service.fake"},
 			want: HttpWaiter{},
 		},
 		{
@@ -54,6 +54,11 @@ func Test_getWaiterForResource(t *testing.T) {
 		{
 			name:    "invalid resource format 3",
 			args:    args{resource: ":123"},
+			wantErr: true,
+		},
+		{
+			name:    "invalid resource format 4",
+			args:    args{resource: "ssh://service.fake"},
 			wantErr: true,
 		},
 	}
