@@ -10,6 +10,7 @@ on:
 jobs:
 
   test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -37,6 +38,7 @@ jobs:
         run: go test -v ./...
 
   build-binary:
+    name: Build binaries
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -102,7 +104,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build-docker:
+  publish-docker:
+    name: Publish Docker image
     needs: test
     runs-on: ubuntu-latest
     steps:
