@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/merusso/netwait/wait"
 	"os"
 	"time"
 
@@ -22,6 +23,12 @@ netwait --timeout 10s https://github.com
 netwait https://github.com https://github.com/merusso/netwait`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: runWait,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		silentEnabled, _ := cmd.Flags().GetBool("silent")
+		if silentEnabled {
+			wait.CurrentOutputLevel = wait.SILENT
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -36,4 +43,6 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().DurationP("timeout", "t", 1*time.Minute,
 		"timeout to abort connection attempts")
+	rootCmd.PersistentFlags().BoolP("silent", "s", false,
+		"do not print to standard out")
 }

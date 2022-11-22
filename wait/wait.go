@@ -27,6 +27,8 @@ func (c CompositeMultiWaiter) Wait(ctx context.Context, resource string) error {
 		return err
 	}
 
+	delegate = LogWaiterDecorator{delegate: delegate}
+
 	// run wait on delegate
 	return delegate.Wait(ctx, resource)
 }
@@ -72,6 +74,23 @@ func getWaiterForResource(resource string) (NetWaiter, error) {
 	}
 
 	return nil, fmt.Errorf("invalid format: %s", resource)
+}
+
+// LogWaiterDecorator wraps a NetWaiter and adds logging around Wait()
+type LogWaiterDecorator struct {
+	delegate NetWaiter
+}
+
+var _ NetWaiter = LogWaiterDecorator{}
+
+func (d LogWaiterDecorator) Wait(ctx context.Context, resource string) error {
+	err := d.delegate.Wait(ctx, resource)
+	if err == nil {
+		Println("available:", resource)
+	} else {
+		Println("unavailable:", resource)
+	}
+	return err
 }
 
 // retryCheck retries a check until the context deadline expires
