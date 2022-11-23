@@ -91,11 +91,9 @@ available: github.com:443
 
 ## Docker
 
-Netwait is available as a Docker image. The image is configured with an
-`ENTRYPOINT` pointing to `netwait`, so `CMD` arguments are treated as
-arguments passed to `netwait`
+Netwait is available as a Docker image.
 
 ```bash
-$ docker run --rm merusso/netwait https://github.com
+$ docker run merusso/netwait https://github.com
 available: https://github.com
 ```
