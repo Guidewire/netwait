@@ -1,0 +1,50 @@
+name: build-multiarch
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+
+  build-binary:
+    name: Build binaries
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Docker Metadata action
+      id: meta
+      uses: docker/metadata-action@v4.1.1
+      with:
+        images: fake
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+
+      # See: https://github.com/magnetikonline/action-golang-cache
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - name: Install Gox
+      run: go install github.com/mitchellh/gox@latest
+
+    - name: Build multi-arch
+      run: >
+        gox -osarch='linux/amd64 darwin/amd64 windows/amd64'
+        -output='build/{{.Dir}}-{{.OS}}-{{.Arch}}'
+        -ldflags "-X 'github.com/merusso/netwait/cmd.version=${{ steps.meta.outputs.version }}'"
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: netwait
+        path: build/
