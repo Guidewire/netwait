@@ -97,3 +97,60 @@ Netwait is available as a Docker image.
 $ docker run merusso/netwait https://github.com
 available: https://github.com
 ```
+
+## Kubernetes
+
+One common use for this utility is to add a wait step when starting a service
+that has a startup dependency on another service.
+
+For example, service A depends on service B and needs to wait to start until
+service B is available. By using netwait in service A before running the normal
+startup process, the startup will be paused until service B is available.
+
+The simplest way to achieve this is by adding an initContainer for netwait. This
+is run before a Pod's normal containers are started.
+
+For example, here service "alpha" is configured to wait for services "bravo" and
+"charlie" using netwait in an initContainer.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpha
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: alpha
+  template:
+    metadata:
+      labels:
+        app: alpha
+    spec:
+      initContainers:
+        - name: netwait
+          image: merusso/netwait:0.2
+          args:
+            # wait for TCP service bravo and HTTP service charlie
+            - bravo.some-namespace.svc:1234
+            - http://charlie.some-namespace.svc:8080
+      containers:
+        # Main container for alpha service, using podinfo as an example.
+        # Assume this service has a startup requirement for bravo and charlie.
+        - name: podinfo
+          image: ghcr.io/stefanprodan/podinfo:6.1.6
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          command:
+            - ./podinfo
+            - --port=8080
+            - --level=debug
+```
+
+Alternatively, netwait can be installed into service A's image and the startup
+process can be adjusted to call netwait before the primary startup.
