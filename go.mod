@@ -1,4 +1,4 @@
-module github.com/merusso/netwait
+module github.com/guidewire/netwait
 
 go 1.18
 

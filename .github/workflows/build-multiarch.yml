@@ -41,7 +41,7 @@ jobs:
       run: >
         gox -osarch='linux/amd64 darwin/amd64 windows/amd64'
         -output='build/{{.Dir}}-{{.OS}}-{{.Arch}}'
-        -ldflags "-X 'github.com/merusso/netwait/cmd.version=${{ steps.meta.outputs.version }}'"
+        -ldflags "-X 'github.com/guidewire/netwait/cmd.version=${{ steps.meta.outputs.version }}'"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v3

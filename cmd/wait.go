@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/merusso/netwait/wait"
+	"github.com/guidewire/netwait/wait"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +17,7 @@ Examples:
 wait https://github.com
 wait github.com
 wait --timeout 10s https://github.com
-wait https://github.com https://github.com/merusso/netwait
+wait https://github.com https://github.com/guidewire/netwait
 `,
 	RunE: runWait,
 	Args: cobra.MinimumNArgs(1),

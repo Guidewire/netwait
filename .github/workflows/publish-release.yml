@@ -48,7 +48,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4.1.1
         with:
-          images: merusso/netwait
+          images: gwre/netwait
           tags: |
             type=ref,event=branch
             type=ref,event=pr

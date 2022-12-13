@@ -12,9 +12,9 @@ available.
 
 Netwait is provided as platform-specific binaries and a Docker image.
 
-For platform binaries, see [releases](https://github.com/merusso/netwait/releases)
+For platform binaries, see [releases](https://github.com/guidewire/netwait/releases)
 
-Docker image: [merusso/netwait](https://hub.docker.com/r/merusso/netwait)
+Docker image: [gwre/netwait](https://hub.docker.com/r/gwre/netwait)
 
 # Usage
 
@@ -94,7 +94,7 @@ available: github.com:443
 Netwait is available as a Docker image.
 
 ```bash
-$ docker run merusso/netwait https://github.com
+$ docker run gwre/netwait https://github.com
 available: https://github.com
 ```
 
@@ -132,7 +132,7 @@ spec:
     spec:
       initContainers:
         - name: netwait
-          image: merusso/netwait:0.2
+          image: gwre/netwait:0.2
           args:
             # wait for TCP service bravo and HTTP service charlie
             - bravo.some-namespace.svc:1234

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/merusso/netwait/cmd"
+import "github.com/guidewire/netwait/cmd"
 
 func main() {
 	cmd.Execute()

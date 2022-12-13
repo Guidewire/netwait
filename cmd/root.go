@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/merusso/netwait/wait"
+	"github.com/guidewire/netwait/wait"
 	"os"
 	"time"
 
@@ -20,7 +20,7 @@ Examples:
 netwait https://github.com
 netwait github.com
 netwait --timeout 10s https://github.com
-netwait https://github.com https://github.com/merusso/netwait`,
+netwait https://github.com https://github.com/guidewire/netwait`,
 	Args: cobra.MinimumNArgs(1),
 	RunE: runWait,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
