@@ -1,6 +1,6 @@
 # Netwait
 
-Netwait is a CLI utility used to wait for a network resource (URL, host:port)
+Netwait is a CLI utility used to wait for a network resource (HTTP, TCP service)
 to become available.
 
 The utility is a single binary with no dependencies so that it is easy to
@@ -43,8 +43,8 @@ FAIL
 
 ## HTTP resource
 
-Netwait can wait for an HTTP URL. Success is defined as an HTTP response with
-a 2xx status code. HTTP Redirects are followed.
+Netwait can wait for an HTTP (or HTTPS) URL. Success is defined as an HTTP
+response with a 2xx status code. HTTP Redirects are followed.
 
 ```bash
 $ netwait http://httpbin.org/status/200
@@ -60,6 +60,9 @@ Error: All attempts fail:
 ```
 
 ## TCP resource
+
+Netwait can wait for a TCP service via {host}:{port} format. Success is defined
+as a successful TCP handshake.
 
 ```bash
 $ netwait github.com:443
