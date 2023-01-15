@@ -4,23 +4,24 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/avast/retry-go/v4"
-	"golang.org/x/sync/errgroup"
 	"net"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/avast/retry-go/v4"
+	"golang.org/x/sync/errgroup"
 )
 
 type NetWaiter interface {
-	Wait(ctx context.Context, resource string) error
+	Wait(ctx context.Context, resource string, retryOptions []retry.Option) error
 }
 
 type CompositeMultiWaiter struct{}
 
 var _ NetWaiter = CompositeMultiWaiter{}
 
-func (c CompositeMultiWaiter) Wait(ctx context.Context, resource string) error {
+func (c CompositeMultiWaiter) Wait(ctx context.Context, resource string, retryOptions []retry.Option) error {
 	// look up waiter for resource
 	delegate, err := getWaiterForResource(resource)
 	if err != nil {
@@ -30,10 +31,11 @@ func (c CompositeMultiWaiter) Wait(ctx context.Context, resource string) error {
 	delegate = LogWaiterDecorator{delegate: delegate}
 
 	// run wait on delegate
-	return delegate.Wait(ctx, resource)
+	return delegate.Wait(ctx, resource, retryOptions)
 }
 
-func (c CompositeMultiWaiter) WaitMulti(resources []string, timeout time.Duration) error {
+func (c CompositeMultiWaiter) WaitMulti(resources []string, timeout time.Duration, retryOptions []retry.Option) error {
+
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -41,7 +43,7 @@ func (c CompositeMultiWaiter) WaitMulti(resources []string, timeout time.Duratio
 	for _, resource := range resources {
 		r := resource
 		errs.Go(func() error {
-			return c.Wait(ctx, r)
+			return c.Wait(ctx, r, retryOptions)
 		})
 	}
 	return errs.Wait()
@@ -87,8 +89,8 @@ type LogWaiterDecorator struct {
 
 var _ NetWaiter = LogWaiterDecorator{}
 
-func (d LogWaiterDecorator) Wait(ctx context.Context, resource string) error {
-	err := d.delegate.Wait(ctx, resource)
+func (d LogWaiterDecorator) Wait(ctx context.Context, resource string, retryOptions []retry.Option) error {
+	err := d.delegate.Wait(ctx, resource, retryOptions)
 	if err == nil {
 		Println("available:", resource)
 	} else {
@@ -98,8 +100,12 @@ func (d LogWaiterDecorator) Wait(ctx context.Context, resource string) error {
 }
 
 // retryCheck retries a check until the context deadline expires
-func retryCheck(ctx context.Context, check func() error) error {
+// func retryCheck(ctx context.Context, check func() error) error {
+func retryCheck(ctx context.Context, check func() error, retryOptions []retry.Option) error {
+	retryOptions = append(retryOptions, retry.Context(ctx))
+	retryOptions = append(retryOptions, retry.Delay(2*time.Second))
+
 	return retry.Do(func() error {
 		return check()
-	}, retry.Context(ctx), retry.Delay(2*time.Second))
+	}, retryOptions...)
 }

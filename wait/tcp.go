@@ -4,16 +4,18 @@ import (
 	"context"
 	"fmt"
 	"net"
+
+	"github.com/avast/retry-go/v4"
 )
 
 type TcpWaiter struct{}
 
 var _ NetWaiter = TcpWaiter{}
 
-func (h TcpWaiter) Wait(ctx context.Context, address string) error {
+func (h TcpWaiter) Wait(ctx context.Context, address string, retryOptions []retry.Option) error {
 	return retryCheck(ctx, func() error {
 		return checkTcp(ctx, address)
-	})
+	}, retryOptions)
 }
 
 func checkTcp(ctx context.Context, address string) error {

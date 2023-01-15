@@ -2,11 +2,12 @@ package wait
 
 import (
 	"context"
-	. "github.com/onsi/gomega"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	. "github.com/onsi/gomega"
 )
 
 func TestHttpWaiter_Wait(t *testing.T) {
@@ -22,6 +23,6 @@ func TestHttpWaiter_Wait(t *testing.T) {
 	defer cancel()
 
 	waiter := HttpWaiter{}
-	err := waiter.Wait(ctx, server.URL)
+	err := waiter.Wait(ctx, server.URL, nil)
 	g.Expect(err).ToNot(HaveOccurred())
 }
