@@ -29,17 +29,19 @@ func init() {
 }
 
 func runWait(cmd *cobra.Command, args []string) error {
-	cmd.SilenceUsage = true
 	timeout, err := cmd.Flags().GetDuration("timeout")
 	if err != nil {
 		panic(err)
 	}
+
 	maxDelay, err := cmd.Flags().GetDuration("max-delay")
 	if err != nil {
 		panic(err)
 	}
 	var retryOptions []retry.Option
 	retryOptions = append(retryOptions, retry.MaxDelay(maxDelay))
+
+	cmd.SilenceUsage = true
 
 	waiter := wait.CompositeMultiWaiter{}
 	return waiter.WaitMulti(args, timeout, retryOptions)
