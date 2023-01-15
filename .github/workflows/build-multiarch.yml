@@ -38,6 +38,8 @@ jobs:
       run: go install github.com/mitchellh/gox@latest
 
     - name: Build multi-arch
+      env:
+        CGO_ENABLED: 0
       run: >
         gox -osarch='linux/amd64 darwin/amd64 windows/amd64'
         -output='build/{{.Dir}}-{{.OS}}-{{.Arch}}'
