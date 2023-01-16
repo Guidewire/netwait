@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/avast/retry-go/v4"
 	"github.com/guidewire/netwait/wait"
 	"github.com/spf13/cobra"
 )
@@ -32,8 +33,16 @@ func runWait(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		panic(err)
 	}
+
+	maxDelay, err := cmd.Flags().GetDuration("max-delay")
+	if err != nil {
+		panic(err)
+	}
+	var retryOptions []retry.Option
+	retryOptions = append(retryOptions, retry.MaxDelay(maxDelay))
+
 	cmd.SilenceUsage = true
 
 	waiter := wait.CompositeMultiWaiter{}
-	return waiter.WaitMulti(args, timeout)
+	return waiter.WaitMulti(args, timeout, retryOptions)
 }

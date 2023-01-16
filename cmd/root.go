@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"github.com/guidewire/netwait/wait"
 	"os"
 	"time"
+
+	"github.com/guidewire/netwait/wait"
 
 	"github.com/spf13/cobra"
 )
@@ -43,6 +44,8 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().DurationP("timeout", "t", 1*time.Minute,
 		"timeout to abort connection attempts")
+	rootCmd.PersistentFlags().DurationP("max-delay", "d", 0,
+		"maximum delay between retry attempts")
 	rootCmd.PersistentFlags().BoolP("silent", "s", false,
 		"do not print to standard out")
 }
