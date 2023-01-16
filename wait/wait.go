@@ -56,7 +56,7 @@ func getWaiterForResource(resource string) (NetWaiter, error) {
 	u, err := url.ParseRequestURI(resource)
 	if err == nil && u.Scheme != "" && u.Host != "" {
 		if u.Scheme == "http" || u.Scheme == "https" {
-			return HttpWaiter{}, nil
+			return HttpWaiter, nil
 		} else {
 			return nil, fmt.Errorf("invalid format: URL scheme must be http(s): %s", resource)
 		}
@@ -72,11 +72,11 @@ func getWaiterForResource(resource string) (NetWaiter, error) {
 		// If parse error "missing port in address" returned, assume DNS
 		var addrError *net.AddrError
 		if errors.As(err, &addrError) && addrError.Err == "missing port in address" {
-			return DnsWaiter{}, nil
+			return DnsWaiter, nil
 		}
 	} else if host != "" && port != "" {
 		// if parser returned host and port, assume TCP
-		return TcpWaiter{}, nil
+		return TcpWaiter, nil
 	}
 
 	return nil, fmt.Errorf("invalid format: %s", resource)
@@ -99,13 +99,18 @@ func (d LogWaiterDecorator) Wait(ctx context.Context, resource string, retryOpti
 	return err
 }
 
-// retryCheck retries a check until the context deadline expires
-// func retryCheck(ctx context.Context, check func() error) error {
-func retryCheck(ctx context.Context, check func() error, retryOptions []retry.Option) error {
+// RetryWaiter is a generic NetWaiter that retries a check on error until the context deadline expires
+type RetryWaiter struct {
+	Check func(ctx context.Context, resource string) error
+}
+
+var _ NetWaiter = RetryWaiter{}
+
+func (w RetryWaiter) Wait(ctx context.Context, resource string, retryOptions []retry.Option) error {
 	retryOptions = append(retryOptions, retry.Context(ctx))
 	retryOptions = append(retryOptions, retry.Delay(2*time.Second))
 
 	return retry.Do(func() error {
-		return check()
+		return w.Check(ctx, resource)
 	}, retryOptions...)
 }

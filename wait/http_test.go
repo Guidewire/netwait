@@ -22,7 +22,7 @@ func TestHttpWaiter_Wait(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
-	waiter := HttpWaiter{}
+	waiter := HttpWaiter
 	err := waiter.Wait(ctx, server.URL, nil)
 	g.Expect(err).ToNot(HaveOccurred())
 }

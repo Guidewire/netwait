@@ -5,18 +5,10 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-
-	"github.com/avast/retry-go/v4"
 )
 
-type HttpWaiter struct{}
-
-var _ NetWaiter = HttpWaiter{}
-
-func (h HttpWaiter) Wait(ctx context.Context, url string, retryOptions []retry.Option) error {
-	return retryCheck(ctx, func() error {
-		return checkHttp(ctx, url)
-	}, retryOptions)
+var HttpWaiter = &RetryWaiter{
+	Check: checkHttp,
 }
 
 func checkHttp(ctx context.Context, url string) error {
