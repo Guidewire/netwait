@@ -14,14 +14,14 @@ import (
 )
 
 type NetWaiter interface {
-	Wait(ctx context.Context, resource string, retryOptions []retry.Option) error
+	Wait(ctx context.Context, resource string, options []Option) error
 }
 
 type CompositeMultiWaiter struct{}
 
 var _ NetWaiter = CompositeMultiWaiter{}
 
-func (c CompositeMultiWaiter) Wait(ctx context.Context, resource string, retryOptions []retry.Option) error {
+func (c CompositeMultiWaiter) Wait(ctx context.Context, resource string, options []Option) error {
 	// look up waiter for resource
 	delegate, err := getWaiterForResource(resource)
 	if err != nil {
@@ -31,19 +31,20 @@ func (c CompositeMultiWaiter) Wait(ctx context.Context, resource string, retryOp
 	delegate = LogWaiterDecorator{delegate: delegate}
 
 	// run wait on delegate
-	return delegate.Wait(ctx, resource, retryOptions)
+	return delegate.Wait(ctx, resource, options)
 }
 
-func (c CompositeMultiWaiter) WaitMulti(resources []string, timeout time.Duration, retryOptions []retry.Option) error {
+func (c CompositeMultiWaiter) WaitMulti(resources []string, options []Option) error {
+	cfg := getConfig(options)
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.timeout)
 	defer cancel()
 
 	errs, ctx := errgroup.WithContext(ctx)
 	for _, resource := range resources {
 		r := resource
 		errs.Go(func() error {
-			return c.Wait(ctx, r, retryOptions)
+			return c.Wait(ctx, r, options)
 		})
 	}
 	return errs.Wait()
@@ -89,8 +90,8 @@ type LogWaiterDecorator struct {
 
 var _ NetWaiter = LogWaiterDecorator{}
 
-func (d LogWaiterDecorator) Wait(ctx context.Context, resource string, retryOptions []retry.Option) error {
-	err := d.delegate.Wait(ctx, resource, retryOptions)
+func (d LogWaiterDecorator) Wait(ctx context.Context, resource string, options []Option) error {
+	err := d.delegate.Wait(ctx, resource, options)
 	if err == nil {
 		Println("available:", resource)
 	} else {
@@ -106,11 +107,22 @@ type RetryWaiter struct {
 
 var _ NetWaiter = RetryWaiter{}
 
-func (w RetryWaiter) Wait(ctx context.Context, resource string, retryOptions []retry.Option) error {
+func (w RetryWaiter) Wait(ctx context.Context, resource string, options []Option) error {
+	cfg := getConfig(options)
+
+	retryOptions := []retry.Option{}
 	retryOptions = append(retryOptions, retry.Context(ctx))
 	retryOptions = append(retryOptions, retry.Delay(2*time.Second))
+	if cfg.retryMaxDelay > 0 {
+		retryOptions = append(retryOptions, retry.MaxDelay(cfg.retryMaxDelay))
+	}
 
 	return retry.Do(func() error {
+		if cfg.perAttemptTimeout > 0 {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, cfg.perAttemptTimeout)
+			defer cancel()
+		}
 		return w.Check(ctx, resource)
 	}, retryOptions...)
 }
