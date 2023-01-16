@@ -28,18 +28,20 @@ func init() {
 }
 
 func runWait(cmd *cobra.Command, args []string) error {
-	cfg := wait.Config{}
+	cfg := wait.DefaultConfig()
 	var err error
 
-	cfg.Timeout, err = cmd.Flags().GetDuration("timeout")
+	timeout, err := cmd.Flags().GetDuration("timeout")
 	if err != nil {
 		panic(err)
 	}
+	cfg.Timeout = timeout
 
-	cfg.RetryMaxDelay, err = cmd.Flags().GetDuration("max-delay")
+	retryMaxDelay, err := cmd.Flags().GetDuration("max-delay")
 	if err != nil {
 		panic(err)
 	}
+	cfg.RetryMaxDelay = &retryMaxDelay
 
 	cmd.SilenceUsage = true
 
