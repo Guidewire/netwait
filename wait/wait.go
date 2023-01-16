@@ -135,11 +135,7 @@ func (w RetryWaiter) Wait(ctx context.Context, resource string, config Config) e
 		retryOptions = append(retryOptions, retry.Delay(*config.RetryDelay))
 	}
 	if config.RetryMaxDelay != nil {
-		maxDelay := *config.RetryMaxDelay
-		if maxDelay == 0 {
-			maxDelay = 1 * time.Nanosecond
-		}
-		retryOptions = append(retryOptions, retry.MaxDelay(maxDelay))
+		retryOptions = append(retryOptions, retry.MaxDelay(*config.RetryMaxDelay))
 	}
 
 	attempts := config.Attempts
