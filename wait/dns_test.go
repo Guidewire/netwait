@@ -2,9 +2,10 @@ package wait
 
 import (
 	"context"
-	. "github.com/onsi/gomega"
 	"testing"
 	"time"
+
+	. "github.com/onsi/gomega"
 )
 
 func TestDnsWaiter_Wait(t *testing.T) {
@@ -13,7 +14,7 @@ func TestDnsWaiter_Wait(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
-	waiter := DnsWaiter{}
+	waiter := DnsWaiter
 	err := waiter.Wait(ctx, "localhost")
 	g.Expect(err).ToNot(HaveOccurred())
 }

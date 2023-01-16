@@ -7,14 +7,8 @@ import (
 	"net/http"
 )
 
-type HttpWaiter struct{}
-
-var _ NetWaiter = HttpWaiter{}
-
-func (h HttpWaiter) Wait(ctx context.Context, url string) error {
-	return retryCheck(ctx, func() error {
-		return checkHttp(ctx, url)
-	})
+var HttpWaiter = &RetryWaiter{
+	Check: checkHttp,
 }
 
 func checkHttp(ctx context.Context, url string) error {

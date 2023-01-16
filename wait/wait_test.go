@@ -19,27 +19,27 @@ func Test_getWaiterForResource(t *testing.T) {
 		{
 			name: "HTTP resource, full URL",
 			args: args{resource: "https://service.fake:443/a/b/c?d=e"},
-			want: HttpWaiter{},
+			want: HttpWaiter,
 		},
 		{
 			name: "HTTP resource, short URL",
 			args: args{resource: "http://service.fake"},
-			want: HttpWaiter{},
+			want: HttpWaiter,
 		},
 		{
 			name: "TCP resource",
 			args: args{resource: "service.fake:123"},
-			want: TcpWaiter{},
+			want: TcpWaiter,
 		},
 		{
 			name: "TCP resource",
 			args: args{resource: "127.0.0.1:123"},
-			want: TcpWaiter{},
+			want: TcpWaiter,
 		},
 		{
 			name: "DNS resource",
 			args: args{resource: "service.fake"},
-			want: DnsWaiter{},
+			want: DnsWaiter,
 		},
 		{
 			name:    "invalid resource format 1",

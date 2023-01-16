@@ -6,14 +6,8 @@ import (
 	"net"
 )
 
-type TcpWaiter struct{}
-
-var _ NetWaiter = TcpWaiter{}
-
-func (h TcpWaiter) Wait(ctx context.Context, address string) error {
-	return retryCheck(ctx, func() error {
-		return checkTcp(ctx, address)
-	})
+var TcpWaiter = &RetryWaiter{
+	Check: checkTcp,
 }
 
 func checkTcp(ctx context.Context, address string) error {
