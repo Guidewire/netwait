@@ -145,7 +145,7 @@ func (w RetryWaiter) Wait(ctx context.Context, resource string, config Config) e
 	retryOptions = append(retryOptions, retry.Attempts(attempts))
 
 	retryOptions = append(retryOptions, retry.OnRetry(func(n uint, err error) {
-		fmt.Println("retrying")
+		Println("retrying:", resource)
 	}))
 
 	return retry.Do(func() error {
