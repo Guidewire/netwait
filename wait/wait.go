@@ -15,8 +15,24 @@ import (
 
 type Config struct {
 	Timeout           time.Duration
-	PerAttemptTimeout time.Duration
-	RetryMaxDelay     time.Duration
+	PerAttemptTimeout *time.Duration
+	// Limits number of attempts. 0 means unlimited.
+	Attempts      uint
+	RetryDelay    *time.Duration
+	RetryMaxDelay *time.Duration
+}
+
+func DefaultConfig() Config {
+	return Config{
+		Timeout:           1 * time.Minute,
+		PerAttemptTimeout: pDuration(5 * time.Second),
+		Attempts:          0,
+		RetryDelay:        pDuration(2 * time.Second),
+	}
+}
+
+func pDuration(d time.Duration) *time.Duration {
+	return &d
 }
 
 type NetWaiter interface {
@@ -114,15 +130,34 @@ var _ NetWaiter = RetryWaiter{}
 func (w RetryWaiter) Wait(ctx context.Context, resource string, config Config) error {
 	retryOptions := []retry.Option{}
 	retryOptions = append(retryOptions, retry.Context(ctx))
-	retryOptions = append(retryOptions, retry.Delay(2*time.Second))
-	if config.RetryMaxDelay > 0 {
-		retryOptions = append(retryOptions, retry.MaxDelay(config.RetryMaxDelay))
+
+	if config.RetryDelay != nil {
+		retryOptions = append(retryOptions, retry.Delay(*config.RetryDelay))
+	}
+	if config.RetryMaxDelay != nil {
+		maxDelay := *config.RetryMaxDelay
+		if maxDelay == 0 {
+			maxDelay = 1 * time.Nanosecond
+		}
+		retryOptions = append(retryOptions, retry.MaxDelay(maxDelay))
 	}
 
+	attempts := config.Attempts
+	if attempts == 0 {
+		// Due to a bug in retry, setting attempts to 0 causes timeouts to not return error
+		// See: https://github.com/avast/retry-go/issues/83
+		attempts = 99999999
+	}
+	retryOptions = append(retryOptions, retry.Attempts(attempts))
+
+	retryOptions = append(retryOptions, retry.OnRetry(func(n uint, err error) {
+		Println("retrying:", resource)
+	}))
+
 	return retry.Do(func() error {
-		if config.PerAttemptTimeout > 0 {
+		if config.PerAttemptTimeout != nil {
 			var cancel context.CancelFunc
-			ctx, cancel = context.WithTimeout(ctx, config.PerAttemptTimeout)
+			ctx, cancel = context.WithTimeout(context.Background(), *config.PerAttemptTimeout)
 			defer cancel()
 		}
 		return w.Check(ctx, resource)
