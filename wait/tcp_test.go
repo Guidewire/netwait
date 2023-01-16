@@ -27,7 +27,7 @@ func TestTcpWaiter_Wait(t *testing.T) {
 	defer cancel()
 
 	waiter := TcpWaiter
-	err = waiter.Wait(ctx, u.Host, nil)
+	err = waiter.Wait(ctx, u.Host, Config{})
 	g.Expect(err).ToNot(HaveOccurred())
 }
 
@@ -38,6 +38,6 @@ func TestTcpWaiter_Wait_timeout(t *testing.T) {
 	defer cancel()
 
 	waiter := TcpWaiter
-	err := waiter.Wait(ctx, "localhost:65000", nil)
+	err := waiter.Wait(ctx, "localhost:65000", Config{})
 	g.Expect(err).To(HaveOccurred())
 }

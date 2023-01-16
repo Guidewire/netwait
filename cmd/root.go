@@ -44,8 +44,6 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().DurationP("timeout", "t", 1*time.Minute,
 		"timeout to abort connection attempts")
-	rootCmd.PersistentFlags().DurationP("per-attempt-timeout", "a", 5*time.Second,
-		"per attempt timeout to abort connection attempt")
 	rootCmd.PersistentFlags().DurationP("max-delay", "d", 0,
 		"maximum delay between retry attempts")
 	rootCmd.PersistentFlags().BoolP("silent", "s", false,

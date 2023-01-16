@@ -15,6 +15,6 @@ func TestDnsWaiter_Wait(t *testing.T) {
 	defer cancel()
 
 	waiter := DnsWaiter
-	err := waiter.Wait(ctx, "localhost", nil)
+	err := waiter.Wait(ctx, "localhost", Config{})
 	g.Expect(err).ToNot(HaveOccurred())
 }

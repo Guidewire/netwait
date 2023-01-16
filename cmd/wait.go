@@ -28,28 +28,21 @@ func init() {
 }
 
 func runWait(cmd *cobra.Command, args []string) error {
-	waitOptions := []wait.Option{}
+	cfg := wait.Config{}
+	var err error
 
-	timeout, err := cmd.Flags().GetDuration("timeout")
+	cfg.Timeout, err = cmd.Flags().GetDuration("timeout")
 	if err != nil {
 		panic(err)
 	}
-	waitOptions = append(waitOptions, wait.Timeout(timeout))
 
-	perAttemptTimeout, err := cmd.Flags().GetDuration("per-attempt-timeout")
+	cfg.RetryMaxDelay, err = cmd.Flags().GetDuration("max-delay")
 	if err != nil {
 		panic(err)
 	}
-	waitOptions = append(waitOptions, wait.PerAttemptTimeout(perAttemptTimeout))
-
-	maxDelay, err := cmd.Flags().GetDuration("max-delay")
-	if err != nil {
-		panic(err)
-	}
-	waitOptions = append(waitOptions, wait.RetryMaxDelay(maxDelay))
 
 	cmd.SilenceUsage = true
 
 	waiter := wait.CompositeMultiWaiter{}
-	return waiter.WaitMulti(args, waitOptions)
+	return waiter.WaitMulti(args, cfg)
 }
