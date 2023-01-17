@@ -46,7 +46,7 @@ FAIL
 CLI documentation is available via the `help` command.
 
 ```
-$ build/netwait help
+$ netwait help
 
 Repeatedly attempt to connect to a network resource and wait until a successful
 connection has been established or a timeout has elapsed.
