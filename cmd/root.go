@@ -51,3 +51,31 @@ func init() {
 	rootCmd.PersistentFlags().BoolP("silent", "s", false,
 		"do not print to standard out")
 }
+
+func runWait(cmd *cobra.Command, args []string) error {
+	cfg := wait.DefaultConfig()
+	var err error
+
+	timeout, err := cmd.Flags().GetDuration("timeout")
+	if err != nil {
+		panic(err)
+	}
+	cfg.Timeout = timeout
+
+	perAttemptTimeout, err := cmd.Flags().GetDuration("per-attempt-timeout")
+	if err != nil {
+		panic(err)
+	}
+	cfg.PerAttemptTimeout = &perAttemptTimeout
+
+	retryMaxDelay, err := cmd.Flags().GetDuration("max-delay")
+	if err != nil {
+		panic(err)
+	}
+	cfg.RetryMaxDelay = &retryMaxDelay
+
+	cmd.SilenceUsage = true
+
+	waiter := wait.CompositeMultiWaiter{}
+	return waiter.WaitMulti(args, cfg)
+}
