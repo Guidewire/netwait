@@ -7,7 +7,8 @@ COPY go.sum .
 RUN go mod download
 
 COPY . .
-RUN go build -v
+ARG version=unspecified
+RUN go build -v -ldflags "-X 'github.com/guidewire/netwait/cmd.version=$version'"
 
 FROM library/alpine:3.17
 
