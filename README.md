@@ -41,6 +41,41 @@ Error: All attempts fail:
 FAIL
 ```
 
+## Help
+
+CLI documentation is available via the `help` command.
+
+```
+$ build/netwait help
+
+Repeatedly attempt to connect to a network resource and wait until a successful
+connection has been established or a timeout has elapsed.
+
+Examples:
+netwait https://github.com
+netwait github.com
+netwait --timeout 10s https://github.com
+netwait https://github.com https://github.com/guidewire/netwait
+
+Usage:
+  netwait [flags]
+  netwait [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  version     print utility version
+
+Flags:
+  -h, --help                           help for netwait
+  -d, --max-delay duration             maximum delay between retry attempts
+  -a, --per-attempt-timeout duration   per attempt timeout to abort connection attempt (default 5s)
+  -s, --silent                         do not print to standard out
+  -t, --timeout duration               timeout to abort connection attempts (default 1m0s)
+
+Use "netwait [command] --help" for more information about a command.
+```
+
 ## HTTP resource
 
 Netwait can wait for an HTTP (or HTTPS) URL. Success is defined as an HTTP
