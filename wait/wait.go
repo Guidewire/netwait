@@ -14,7 +14,8 @@ import (
 )
 
 type Config struct {
-	Timeout time.Duration
+	Timeout           time.Duration
+	PerAttemptTimeout *time.Duration
 	// Limits number of attempts. 0 means unlimited.
 	Attempts      uint
 	RetryDelay    *time.Duration
@@ -23,9 +24,10 @@ type Config struct {
 
 func DefaultConfig() Config {
 	return Config{
-		Timeout:    1 * time.Minute,
-		Attempts:   0,
-		RetryDelay: pDuration(2 * time.Second),
+		Timeout:           1 * time.Minute,
+		PerAttemptTimeout: pDuration(5 * time.Second),
+		Attempts:          0,
+		RetryDelay:        pDuration(2 * time.Second),
 	}
 }
 
@@ -149,6 +151,11 @@ func (w RetryWaiter) Wait(ctx context.Context, resource string, config Config) e
 	}))
 
 	return retry.Do(func() error {
+		if config.PerAttemptTimeout != nil {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(context.Background(), *config.PerAttemptTimeout)
+			defer cancel()
+		}
 		return w.Check(ctx, resource)
 	}, retryOptions...)
 }

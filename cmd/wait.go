@@ -37,6 +37,12 @@ func runWait(cmd *cobra.Command, args []string) error {
 	}
 	cfg.Timeout = timeout
 
+	perAttemptTimeout, err := cmd.Flags().GetDuration("per-attempt-timeout")
+	if err != nil {
+		panic(err)
+	}
+	cfg.PerAttemptTimeout = &perAttemptTimeout
+
 	retryMaxDelay, err := cmd.Flags().GetDuration("max-delay")
 	if err != nil {
 		panic(err)
