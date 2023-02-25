@@ -22,17 +22,7 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.18
-
-      # See: https://github.com/magnetikonline/action-golang-cache
-      - name: Setup Golang caches
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
+          cache: true
 
       - name: Build
         run: go build -v ./...
