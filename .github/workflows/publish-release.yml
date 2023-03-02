@@ -18,10 +18,12 @@ jobs:
     needs: ci
     uses: ./.github/workflows/build-multiarch.yml
 
-  create-github-release:
-    name: Create GitHub Release
+  create-update-github-release:
+    name: Create or Update GitHub Release
     needs: build-multiarch
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -32,10 +34,25 @@ jobs:
           name: netwait
           path: build
 
+      - name: Check Release
+        id: check-release
+        run: |
+          if gh release view $GITHUB_REF_NAME; then
+            echo "Release already created for tag"
+            releaseExists='true'
+          else
+            echo "Release for tag $GITHUB_REF_NAME does not exist"
+            releaseExists='false'
+          fi
+          echo "release-exists=$releaseExists" >> $GITHUB_OUTPUT
+
       - name: Create Release
-        run: gh release create ${{ github.ref }} --generate-notes build/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: steps.check-release.outputs.release-exists != 'true'
+        run: gh release create $GITHUB_REF --generate-notes build/* 
+
+      - name: Upload to Release
+        if: steps.check-release.outputs.release-exists == 'true'
+        run: gh release upload $GITHUB_REF_NAME build/* --clobber
 
   publish-docker:
     name: Publish Docker image
