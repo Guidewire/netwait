@@ -3,7 +3,7 @@ module github.com/guidewire/netwait
 go 1.18
 
 require (
-	github.com/avast/retry-go/v4 v4.3.1
+	github.com/avast/retry-go/v4 v4.3.4
 	github.com/onsi/gomega v1.24.1
 	github.com/spf13/cobra v1.6.1
 	golang.org/x/sync v0.1.0
