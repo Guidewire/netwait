@@ -140,8 +140,9 @@ func (w RetryWaiter) Wait(ctx context.Context, resource string, config Config) e
 
 	attempts := config.Attempts
 	if attempts == 0 {
-		// Due to a bug in retry, setting attempts to 0 causes timeouts to not return error
-		// See: https://github.com/avast/retry-go/issues/83
+		// Due to retry-go behavior, setting attempts to 0 causes timeouts to
+		// return only "context deadline exceeded" error, not list of errors
+		// from each attempt.
 		attempts = 99999999
 	}
 	retryOptions = append(retryOptions, retry.Attempts(attempts))
