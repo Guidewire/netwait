@@ -154,7 +154,7 @@ func (w RetryWaiter) Wait(ctx context.Context, resource string, config Config) e
 	return retry.Do(func() error {
 		if config.PerAttemptTimeout != nil {
 			var cancel context.CancelFunc
-			ctx, cancel = context.WithTimeout(context.Background(), *config.PerAttemptTimeout)
+			ctx, cancel = context.WithTimeout(ctx, *config.PerAttemptTimeout)
 			defer cancel()
 		}
 		return w.Check(ctx, resource)
