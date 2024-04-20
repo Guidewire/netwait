@@ -7,6 +7,7 @@ require (
 	github.com/onsi/gomega v1.24.1
 	github.com/spf13/cobra v1.6.1
 	golang.org/x/sync v0.1.0
+	gotest.tools/v3 v3.5.1
 )
 
 require (
