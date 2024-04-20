@@ -3,6 +3,8 @@ package wait
 import (
 	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
@@ -162,4 +164,29 @@ func TestRetryWaiter_Wait_errorTimeout(t *testing.T) {
 	err := rw.Wait(ctx, "ignore", cfg)
 	g.Expect(err).To(HaveOccurred())
 	g.Expect(err.Error()).To(ContainSubstring(errCheckFailed.Error()))
+}
+
+// Simulate call to HTTP endpoint which is initially unavailable,
+// eventually available.
+func TestCompositeMultiWaiter_WaitMulti_eventuallySucceed(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	// mock HTTP server
+	attempts := 1
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		// Fail until 4th attempt
+		if attempts < 4 {
+			writer.WriteHeader(500)
+		}
+		attempts++
+	}))
+	defer server.Close()
+
+	cfg := Config{
+		Timeout:           5 * time.Second,
+		PerAttemptTimeout: pDuration(1 * time.Second),
+	}
+	err := CompositeMultiWaiter{}.WaitMulti([]string{server.URL}, cfg)
+
+	g.Expect(err).ToNot(HaveOccurred())
 }
