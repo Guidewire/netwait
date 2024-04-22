@@ -4,37 +4,34 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"gotest.tools/v3/icmd"
 )
 
+// CLI end-to-end tests
 func TestCli(t *testing.T) {
-	cmd := exec.Command("go", "build", "-o", "cli_test/bin/netwait")
-	cmd.Dir = ".."
-	err := cmd.Run()
+	netwaitPath, err := buildCli()
 	if err != nil {
-		t.Fatal(err)
-	}
-
-	netwaitPath := "bin/netwait"
-	_, err = os.Stat(netwaitPath)
-	if err != nil {
-		t.Fatal("netwait binary is required", err)
+		t.Fatal("failed to build app:", err)
 	}
 
 	// mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path == "/status/500" {
+			writer.WriteHeader(500)
+		}
 	}))
 	defer server.Close()
-
-	// mock HTTP server, returns error
-	serverFail := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		writer.WriteHeader(500)
-	}))
-	defer serverFail.Close()
+	serverUrl, err := url.Parse(server.URL)
+	if err != nil {
+		t.Fatalf("failed to parse mock server URL: %s", err)
+	}
+	serverHostPort := serverUrl.Host
 
 	tests := []struct {
 		name     string
@@ -53,12 +50,21 @@ func TestCli(t *testing.T) {
 		},
 		{
 			name: "http unavailable",
-			// netwait http://127.0.0.1:34287 --timeout 5s
-			cmd: icmd.Command(netwaitPath, serverFail.URL, "--timeout", "5s"),
+			// netwait http://127.0.0.1:34287/status/500 --timeout 5s
+			cmd: icmd.Command(netwaitPath, server.URL+"/status/500", "--timeout", "5s"),
 			expected: icmd.Expected{
 				ExitCode: 1,
-				// unavailable: http://127.0.0.1:34287
-				Out: "unavailable: " + serverFail.URL,
+				// unavailable: http://127.0.0.1:34287/status/500
+				Out: "unavailable: " + server.URL + "/status/500",
+			},
+		},
+		{
+			name: "tcp",
+			// netwait 127.0.0.1:34287
+			cmd: icmd.Command(netwaitPath, serverHostPort, "--timeout", "5s"),
+			expected: icmd.Expected{
+				ExitCode: 0,
+				Out:      "available: " + serverHostPort,
 			},
 		},
 		{
@@ -72,12 +78,12 @@ func TestCli(t *testing.T) {
 		},
 		{
 			name: "multiple resources",
-			// netwait http://127.0.0.1:34287 http://127.0.0.1:34287
-			cmd: icmd.Command(netwaitPath, server.URL, server.URL),
+			// netwait http://127.0.0.1:34287 127.0.0.1:34287
+			cmd: icmd.Command(netwaitPath, server.URL, serverHostPort),
 			expected: icmd.Expected{
 				ExitCode: 0,
 				// available: http://127.0.0.1:34287
-				// available: http://127.0.0.1:34287
+				// available: 127.0.0.1:34287
 			},
 		},
 	}
@@ -88,4 +94,20 @@ func TestCli(t *testing.T) {
 			result.Assert(t, tt.expected)
 		})
 	}
+}
+
+// Build app, return path to executable
+func buildCli() (string, error) {
+	cmd := exec.Command("go", "build", "-o", "build/netwait")
+	cmd.Dir = ".."
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("build command failed: %w", err)
+	}
+	path, _ := filepath.Abs("../build/netwait")
+	_, err = os.Stat(path)
+	if err != nil {
+		return "", fmt.Errorf("file does not exist: %w", err)
+	}
+	return path, nil
 }
