@@ -1,4 +1,4 @@
-FROM library/golang:1.22-alpine as build
+FROM library/golang:1.24-alpine AS build
 
 WORKDIR /build
 
